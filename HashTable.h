@@ -32,6 +32,8 @@ public:
   void rehash(size_t); // sets a new size for the hash table, reha/shes the hash table 
 
   // extend if necessary
+
+  void resize(); // resize if the table size is less than the number of entries
 };
 
 
@@ -107,6 +109,9 @@ void HashTable::insert(ulint hashKey, ulint data) {
     cout << hashKey << " key and value " << node->getValue() << 
     " inserted successfully" << endl;
   }
+
+  // resize if the table size is less than the number of entries
+  resize();
 }
 
 void HashTable::erase(ulint hashKey) {
@@ -137,11 +142,14 @@ void HashTable::rehash(size_t tableSize) {
 
   for (list<HashNode> &l : oldTable) {
     for (HashNode &n : l) {
-      if (oldTable.empty() == false) {
-         insert(n.getKey(), n.getValue()); 
-      }
+         insert(n.getKey(), n.getValue());
     }
   }
+}
+
+void HashTable::resize() {
+ if (size() <= num) 
+    table->resize(2*size() + 1); // resize if the table size is less than the number of entries
 }
   
 #endif
