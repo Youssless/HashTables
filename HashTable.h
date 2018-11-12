@@ -29,7 +29,7 @@ public:
   void insert(ulint,ulint); // insert data associated with key into table
   void erase(ulint);        // remove key and associated data from table
 
-  void rehash(size_t); // sets a new size for the hash table, rehashes the hash table 
+  void rehash(size_t); // sets a new size for the hash table, reha/shes the hash table 
 
   // extend if necessary
 };
@@ -69,7 +69,7 @@ size_t HashTable::size() {
 
 size_t HashTable::hash_function(ulint data) {
   ulint key;
-  key = data % table->size(); // key is the data mod the table size
+  key = data % size(); // key is the data mod the table size
 
   return key;
 }
@@ -117,6 +117,7 @@ void HashTable::erase(ulint hashKey) {
   //int count = 0;
   
   for (list<HashNode>::iterator it = hashNodeList->begin(); it != hashNodeList->end(); ++it) {
+
     if ((*it).getKey() == hashKey) {
         cout << "Value to be deleted: " << (*it).getValue() 
         << ", Key to be deleted: " << (*it).getKey() << endl;
@@ -129,16 +130,18 @@ void HashTable::erase(ulint hashKey) {
   throw KEY_NOT_FOUND; // throws error code 1
 }
 
-void HashTable::rehash(size_t tableSize) { 
-  Table temp = *table;
+void HashTable::rehash(size_t tableSize) {
+  Table oldTable = *table;
   table->clear();
-  table->resize(tableSize);
+  table = new Table(tableSize);
 
-  for (list<HashNode>& list : temp) {
-    for (HashNode& node : list) {
-      insert(node.getKey(), node.getValue());
+  for (list<HashNode> &l : oldTable) {
+    for (HashNode &n : l) {
+      if (oldTable.empty() == false) {
+         insert(n.getKey(), n.getValue()); 
+      }
     }
   }
 }
-
+  
 #endif
