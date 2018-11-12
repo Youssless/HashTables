@@ -69,7 +69,7 @@ size_t HashTable::size() {
 
 size_t HashTable::hash_function(ulint data) {
   ulint key;
-  key = data % size(); // key is the data mod the table size
+  key = data % table->size(); // key is the data mod the table size
 
   return key;
 }
@@ -93,7 +93,13 @@ void HashTable::insert(ulint hashKey, ulint data) {
   ulint key = hash_function(hashKey); // key for each individual node
   hashNodeList = &(table->at(key)); // linked list initialised at the vector index determined by the key
 
+
   node->assign(hashKey, data); // assign the key and the data to the node
+
+  for (list<HashNode>::iterator it = hashNodeList->begin(); it != hashNodeList->end(); ++it) {
+    if (it->getKey() == hashKey)
+      return;
+  }
   hashNodeList->push_back(*node); // add the node to the back
   num++; // number of entries increased
 
@@ -104,17 +110,17 @@ void HashTable::insert(ulint hashKey, ulint data) {
 }
 
 void HashTable::erase(ulint hashKey) {
-  list<HashNode> hashNodeList;
+  list<HashNode>* hashNodeList;
   ulint key = hash_function(hashKey); // hash
-  hashNodeList = this->table->at(key); // linked list initialised at the vector index determined by the key
+  hashNodeList = &(table->at(key)); // linked list initialised at the vector index determined by the key
 
   //int count = 0;
   
-  for (list<HashNode>::iterator it = hashNodeList.begin(); it != hashNodeList.end(); ++it) {
+  for (list<HashNode>::iterator it = hashNodeList->begin(); it != hashNodeList->end(); ++it) {
     if ((*it).getKey() == hashKey) {
         cout << "Value to be deleted: " << (*it).getValue() 
         << ", Key to be deleted: " << (*it).getKey() << endl;
-        hashNodeList.erase(it); // erase the contents at iterator pos
+        hashNodeList->erase(it); // erase the contents at iterator pos
         num--; // table size decreased by 1
 
         return;
