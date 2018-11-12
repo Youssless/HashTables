@@ -13,6 +13,7 @@ public:
 
   // Add constructors, destructor if necessary
   //HashNode(unsigned long key, unsigned long value);
+  HashNode();
   unsigned long getKey() { return key; }
   unsigned long getValue() { return value; }
   void assign(unsigned long key, unsigned long value); 
@@ -25,10 +26,13 @@ public:
    and any methods that you may additionally need for the HashTable to work.
 */
 
+HashNode::HashNode() {
+  this->key = 0;
+  this->value = 0; 
+}
 
 void HashNode::assign(unsigned long key, unsigned long value) {
     this->key = key;
     this->value = value;
 }
-
 #endif
