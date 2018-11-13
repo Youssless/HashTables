@@ -33,7 +33,7 @@ public:
 
   // extend if necessary
 
-  void resize(); // resize if the table size is less than the number of entries
+  bool isresize(); // resize if the table size is less than the number of entries
 };
 
 
@@ -98,20 +98,25 @@ void HashTable::insert(ulint hashKey, ulint data) {
 
   node->assign(hashKey, data); // assign the key and the data to the node
 
+
   for (list<HashNode>::iterator it = hashNodeList->begin(); it != hashNodeList->end(); ++it) {
     if (it->getKey() == hashKey)
       return;
   }
   hashNodeList->push_back(*node); // add the node to the back
+
+
   num++; // number of entries increased
 
+  // resize if the table size is less than the number of entries
+  if (isresize() == true)
+    rehash(2*size() + 1); // make sure its prime
+    
   if (getValue(hashKey) == node->getValue()) {
     cout << hashKey << " key and value " << node->getValue() << 
     " inserted successfully" << endl;
   }
 
-  // resize if the table size is less than the number of entries
-  resize();
 }
 
 void HashTable::erase(ulint hashKey) {
@@ -129,7 +134,7 @@ void HashTable::erase(ulint hashKey) {
         hashNodeList->erase(it); // erase the contents at iterator pos
         num--; // table size decreased by 1
 
-        return;
+        return; // once found return otherwise it will keep on searching 
     }
   }
   throw KEY_NOT_FOUND; // throws error code 1
@@ -140,16 +145,25 @@ void HashTable::rehash(size_t tableSize) {
   table->clear();
   table = new Table(tableSize);
 
-  for (list<HashNode> &l : oldTable) {
-    for (HashNode &n : l) {
-         insert(n.getKey(), n.getValue());
+  printf("\nREHASHING\n");
+  // reference to list in oldTable
+  for (list<HashNode> &list : oldTable) {
+    //reference to node in list
+    for (HashNode &node : list) {
+      // oldTable must not be empty before the insert and list
+      if (!oldTable.empty() && !list.empty()) {
+        // insert key and value each node at the list
+        insert(node.getKey(), node.getValue());
+      }
     }
   }
 }
 
-void HashTable::resize() {
- if (size() <= num) 
-    table->resize(2*size() + 1); // resize if the table size is less than the number of entries
+bool HashTable::isresize() {
+ if (size() <= num)
+    return true;
+  else
+    return false;
 }
   
 #endif
