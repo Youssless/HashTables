@@ -34,6 +34,7 @@ public:
   // extend if necessary
 
   bool isresize(); // resize if the table size is less than the number of entries
+  bool findKey(ulint); // retruns true if the key is found
 };
 
 
@@ -86,6 +87,21 @@ ulint HashTable::getValue(ulint hashKey) {
       return n.getValue();
   }
   throw KEY_NOT_FOUND;
+}
+
+/*
+  used in mc_dlog.cpp
+*/
+bool HashTable::findKey(ulint y) {
+  list<HashNode> *hashNodeList;
+  ulint key = hash_function(y);
+  hashNodeList = &(table->at(key));
+
+  for (auto& n : *hashNodeList) {
+    if (y == n.getKey())
+      return true;
+  }
+  return false;
 }
 
 void HashTable::insert(ulint hashKey, ulint data) {
@@ -165,5 +181,6 @@ bool HashTable::isresize() {
   else
     return false;
 }
+
   
 #endif
