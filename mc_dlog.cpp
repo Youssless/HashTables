@@ -11,14 +11,15 @@ using namespace std;
 /* Implement mc_dlog in this file */
 
 // function declerations
-int orderG(int n, int g, HashTable &Ord);
-int discreteLog(int n, int g, int a, HashTable &A, HashTable &B);
-void MC_DLog(int n, int g, int a, HashTable &Ord, HashTable &A, HashTable &B);
-int randNum(int n);
+ulint orderG(ulint, ulint, HashTable&);
+ulint discreteLog(ulint, ulint, ulint, HashTable&, HashTable&);
+void MC_DLog(ulint, ulint, ulint, HashTable&, HashTable&, HashTable&);
+inline ulint modexp(ulint, ulint, ulint);
+inline ulint randNum(ulint);
 //
 
 int main(int argc, char** argv) {
-    int n, g, a;
+    ulint n, g, a;
     if (argc == 4) {
         HashTable Ord = HashTable();
         HashTable A = HashTable();
@@ -45,12 +46,12 @@ int main(int argc, char** argv) {
 }
 
 
-int orderG(int n, int g, HashTable &Ord) {
-    int y, rnd, case_one, case_two;
+ulint orderG(ulint n, ulint g, HashTable &Ord) {
+    ulint y, rnd, case_one, case_two;
 
     for (int i = 0; i < sqrt(n); i++) {
-        rnd = randNum(n);
-        y = (int)pow(g, rnd) % n;
+        rnd = randNum(n-1);
+        y = modexp(g, rnd, n);
 
         // if the key is found
         if (Ord.findKey(y) == true) {
@@ -59,16 +60,11 @@ int orderG(int n, int g, HashTable &Ord) {
             case_two = Ord.hash_function(y) - rnd; // hased y minus random
 
             if (case_one > 0) { // first case greater than 0
-                if (case_one > case_two)
-                    return case_one; // return the greater number of the two
-                else if (case_one == case_two)
-                    return case_one; // return one of them if equal   
+                return case_one;  
             }
             else if (case_two > 0) { // second case greater than 0
-                if (case_two > case_one)
-                    return case_two; // return the greater number of the two
-                else if (case_two == case_one)
-                    return case_two; // return one of them if equal
+
+                return case_two;
             }
             else
                 rnd = Ord.hash_function(y); // set rnd to hashed y
@@ -79,19 +75,20 @@ int orderG(int n, int g, HashTable &Ord) {
     return n - 1;
 }
 
-int discreteLog(int n, int g, int a, HashTable &A, HashTable &B) {
-    int y, rnd, rnd_two; 
-    for (int i = 0; i < sqrt(n); i++) {
-        rnd = randNum(n);
-        y = (a * (int)pow(g, rnd)) % n ;
+ulint discreteLog(ulint n, ulint g, ulint a, HashTable &A, HashTable &B) {
+    ulint y, rnd, rnd_two; 
+    for (ulint i = 0; i < (ulint)sqrt(n); i++) {
+        rnd = randNum(n-1);
+        y = a * (modexp(g, rnd, n));
 
         // key is found
         if (B.findKey(y) == true)
-            return (rnd - B.hash_function(y)); // return rand minus hashed y if the key is found in B
+            return (B.hash_function(y) - rnd); // return rand minus hashed y if the key is found in B
         else
             A.insert(y, rnd); // not found then insert at key y with a random number in A
 
-        rnd_two = randNum(n); // generate another random number
+        rnd_two = randNum(n-1); // generate another random number
+        y = modexp(g, rnd, n);
 
         // key is found
         if (A.findKey(y) == true) 
@@ -99,26 +96,32 @@ int discreteLog(int n, int g, int a, HashTable &A, HashTable &B) {
         else
             B.insert(y, rnd_two); // not found then insert at key y with a random number in A
     }
-    return 0; 
+    
+    return 0;
 }
 
-void MC_DLog(int n, int g, int a, HashTable &Ord, HashTable &A, HashTable &B) {
-    int dLog = discreteLog(n, g, a, A, B);
-    int oG = orderG(n, g, Ord);
-    int result = dLog % oG; // modulus of discrete log and order of g is the result
-
-    cout << "result: " << result << endl; 
+void MC_DLog(ulint n, ulint g, ulint a, HashTable &Ord, HashTable &A, HashTable &B) {
+    ulint dLog = discreteLog(n, g, a, A, B);
+    ulint oG = orderG(n, g, Ord);
+    ulint result = dLog % oG; // modulus of discrete log and order of g is the result 
 
     if (result < 0) { // if the result is less than 0 then add order of g to the result
         result += oG;
-        cout << "result if < 0 : " << result << endl;
     }
+    cout << "result: " << result << endl;
 }
 
+inline ulint modexp(ulint x, ulint exp, ulint mod_num) {
+    ulint result = 1;
 
+	while ((exp--) > 0) {
+		result = (result * x) % mod_num;
+	}
+	return result;
+}
 
-int randNum(int n) {
-    int rnd;
+inline ulint randNum(ulint n) {
+    ulint rnd;
     time_t t;
 
     // random number generator depending on the current data and time
